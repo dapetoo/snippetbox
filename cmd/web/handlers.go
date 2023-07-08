@@ -2,20 +2,29 @@ package main
 
 import (
 	"fmt"
+	"html/template"
 	"log"
 	"net/http"
 	"strconv"
 )
 
 func home(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/" {
-		http.Error(w, "Not Found", http.StatusNotFound)
+	ts, err := template.ParseFiles("./ui/html/home.page.tmpl")
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, "Internal Server Error", 500)
 		return
 	}
 
-	_, err := w.Write([]byte("Hello from Snippet box"))
+	err = ts.Execute(w, nil)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Println(err.Error())
+		http.Error(w, "Internal Server Error", 500)
+		return
+	}
+
+	if r.URL.Path != "/" {
+		http.Error(w, "Not Found", http.StatusNotFound)
 		return
 	}
 }
