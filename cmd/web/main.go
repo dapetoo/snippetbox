@@ -7,19 +7,36 @@ import (
 	"os"
 )
 
+type application struct {
+	errorLog *log.Logger
+	infoLog  *log.Logger
+}
+
 func main() {
 	//This will be used when running the app from the command line
 	addr := flag.String("addr", ":4000", "HTTP network address")
 	flag.Parse()
 
-	//
-	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime|log.Llongfile)
+	//Logging to a file
+	//f, err := os.OpenFile("/tmp/info.log", os.O_RDWR|os.O_CREATE, 0666)
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
+	//defer f.Close()
+
+	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
 	errorLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
 
+	//Initialize a new instance of application containing the dependencies
+	app := &application{
+		errorLog: errorLog,
+		infoLog:  infoLog,
+	}
+
 	mux := http.NewServeMux()
-	mux.HandleFunc("/", home)
-	mux.HandleFunc("/snippet", showSnippet)
-	mux.HandleFunc("/snippet/create", createSnippet)
+	mux.HandleFunc("/", app.home)
+	mux.HandleFunc("/snippet", app.showSnippet)
+	mux.HandleFunc("/snippet/create", app.createSnippet)
 
 	//FileServer to serve static files
 	fileServer := http.FileServer(http.Dir("./ui/static"))
