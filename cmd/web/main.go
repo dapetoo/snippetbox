@@ -1,20 +1,28 @@
 package main
 
 import (
+	"database/sql"
 	"flag"
+	"github.com/dapetoo/snippetbox/pkg/models/mysql"
 	"log"
 	"net/http"
 	"os"
+	"time"
+
+	_ "github.com/go-sql-driver/mysql"
 )
 
 type application struct {
 	errorLog *log.Logger
 	infoLog  *log.Logger
+	snippets *mysql.SnippetModel
 }
 
 func main() {
 	//This will be used when running the app from the command line
 	addr := flag.String("addr", ":4000", "HTTP network address")
+
+	dsn := flag.String("dsn", "peter:password@/snippetbox?parseTime=true", "MySQL data source name")
 	flag.Parse()
 
 	//Logging to a file
@@ -27,29 +35,46 @@ func main() {
 	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
 	errorLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
 
+	db, err := openDB(*dsn)
+	if err != nil {
+		errorLog.Fatal(err)
+	}
+
+	defer db.Close()
+
 	//Initialize a new instance of application containing the dependencies
 	app := &application{
 		errorLog: errorLog,
 		infoLog:  infoLog,
+		snippets: &mysql.SnippetModel{
+			DB: db,
+		},
 	}
 
-	mux := http.NewServeMux()
-	mux.HandleFunc("/", app.home)
-	mux.HandleFunc("/snippet", app.showSnippet)
-	mux.HandleFunc("/snippet/create", app.createSnippet)
+	infoLog.Println("Database Connected Successfully....")
 
-	//FileServer to serve static files
-	fileServer := http.FileServer(http.Dir("./ui/static"))
-
-	//Register the File server with mux.Handle
-	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
+	//Setting DB
+	db.SetConnMaxLifetime(time.Minute * 3)
+	db.SetMaxOpenConns(10)
+	db.SetMaxIdleConns(10)
 
 	infoLog.Printf("Starting the webserver on port %v", *addr)
 	srv := &http.Server{
 		Addr:     *addr,
 		ErrorLog: errorLog,
-		Handler:  mux,
+		Handler:  app.routes(),
 	}
-	err := srv.ListenAndServe()
+	err = srv.ListenAndServe()
 	errorLog.Fatal(err)
+}
+
+func openDB(dsn string) (*sql.DB, error) {
+	db, err := sql.Open("mysql", dsn)
+	if err != nil {
+		return nil, err
+	}
+	if err = db.Ping(); err != nil {
+		return nil, err
+	}
+	return db, nil
 }
