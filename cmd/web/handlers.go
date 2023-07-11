@@ -1,8 +1,11 @@
 package main
 
 import (
+	"errors"
 	"fmt"
+	"github.com/dapetoo/snippetbox/pkg/models"
 	"html/template"
+	"log"
 	"net/http"
 	"strconv"
 )
@@ -31,35 +34,72 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Internal Server Error", 500)
 		return
 	}
+
+	s, err := app.snippets.Latest()
+	if err != nil {
+		app.serverError(w, err)
+	}
+	for _, snippet := range s {
+		_, err = fmt.Fprintf(w, "%v\n", snippet)
+	}
+
 }
 
 func (app *application) showSnippet(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(r.URL.Query().Get("id"))
 	if err != nil || id < 1 {
-		http.NotFound(w, r)
+		app.notFound(w)
 		return
 	}
-	_, err = fmt.Fprintf(w, "Display a specifc snippet with ID %d...", id)
+
+	//Use the Snippet object's Get method to retrieve the data for a specific record based on it's ID
+	s, err := app.snippets.GetByID(id)
 	if err != nil {
-		app.infoLog.Println(err)
+		if errors.Is(err, models.ErrNoRecord) {
+			app.notFound(w)
+		} else {
+			app.serverError(w, err)
+		}
+		return
+	}
+
+	files := []string{
+		"./ui/html/show.page.tmpl",
+		"./ui/html/base.layout.tmpl",
+		"./ui/html/footer.partial.tmpl",
+	}
+
+	ts, err := template.ParseFiles(files...)
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+	//Pass in the data to the template
+	err = ts.Execute(w, s)
+	if err != nil {
+		app.serverError(w, err)
 	}
 }
 
 func (app *application) createSnippet(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		w.Header().Set("Allow", http.MethodPost)
-		w.WriteHeader(405)
-		http.Error(w, "Method Not Allowed", 405)
-		_, err := w.Write([]byte("Method Not Allowed"))
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusMethodNotAllowed)
-			return
-		}
+		app.clientError(w, http.StatusMethodNotAllowed)
 		return
 	}
-	w.Header().Set("Content-Type", "application/json")
-	_, err := w.Write([]byte("Create  a new snippet"))
+
+	title := "O snail"
+	content := "Any content can goes here.........."
+	expires := "7"
+
+	//Pass the data to the SnippetModel.Insert() method
+	id, err := app.snippets.Insert(title, content, expires)
+	log.Println(id)
 	if err != nil {
-		app.errorLog.Println(err)
+		log.Println("Error", err)
+		app.serverError(w, err)
+		return
 	}
+
+	http.Redirect(w, r, fmt.Sprintf("/snippet?id=%d", id), http.StatusSeeOther)
 }
