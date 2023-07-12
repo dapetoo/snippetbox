@@ -28,19 +28,14 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = ts.Execute(w, nil)
+	s, err := app.snippets.Latest()
+	data := &templateData{Snippets: s}
+
+	err = ts.Execute(w, data)
 	if err != nil {
 		app.errorLog.Println(err.Error())
 		http.Error(w, "Internal Server Error", 500)
 		return
-	}
-
-	s, err := app.snippets.Latest()
-	if err != nil {
-		app.serverError(w, err)
-	}
-	for _, snippet := range s {
-		_, err = fmt.Fprintf(w, "%v\n", snippet)
 	}
 
 }
