@@ -4,7 +4,18 @@ import (
 	"github.com/dapetoo/snippetbox/pkg/models"
 	"html/template"
 	"path/filepath"
+	"time"
 )
+
+// HumanDate function to return a nicely formatted string
+func humanDate(t time.Time) string {
+	return t.Format("02 Jan 2006 at 15:04")
+}
+
+// template.FuncMap object to
+var functions = template.FuncMap{
+	"humanDate": humanDate,
+}
 
 // This will hold the structure for any dynamic data that we want to pass to HTML templates
 type templateData struct {
@@ -28,7 +39,7 @@ func newTemplateCache(dir string) (map[string]*template.Template, error) {
 		//Extract file name
 		name := filepath.Base(page)
 		//Parse the page template in to a template set
-		ts, err := template.ParseFiles(page)
+		ts, err := template.New(name).Funcs(functions).ParseFiles(page)
 		if err != nil {
 			return nil, err
 		}
