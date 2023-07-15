@@ -8,6 +8,8 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
+	"unicode/utf8"
 )
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
@@ -85,6 +87,30 @@ func (app *application) createSnippet(w http.ResponseWriter, r *http.Request) {
 	title := r.PostForm.Get("title")
 	content := r.PostForm.Get("content")
 	expires := r.PostForm.Get("expires")
+
+	//Map to hold any validation error
+	formErrors := make(map[string]string)
+	//Check that the fields aren't empty
+	if strings.TrimSpace(title) == "" {
+		formErrors["title"] = "This field cannot be empty"
+	} else if utf8.RuneCountInString(title) > 100 {
+		formErrors["title"] = "This field is too long, maximum is 100 characters"
+	}
+	//Validate the content field
+	if strings.TrimSpace(content) == "" {
+		formErrors["content"] = "This field cannot be empty"
+	}
+	//Check that the expires field is not blank
+	if strings.TrimSpace(expires) == "" {
+		formErrors["content"] = "This field cannot be empty"
+	} else if expires != "365" && expires != "7" && expires != "1" {
+		formErrors["expires"] = "The field is invalid"
+	}
+
+	if len(formErrors) > 0 {
+		fmt.Sprintf()
+		return
+	}
 
 	//Pass the data to the SnippetModel.Insert() method
 	id, err := app.snippets.Insert(title, content, expires)
