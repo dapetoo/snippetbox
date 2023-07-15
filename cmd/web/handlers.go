@@ -108,7 +108,10 @@ func (app *application) createSnippet(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if len(formErrors) > 0 {
-		fmt.Sprintf()
+		app.render(w, r, "create.page.tmpl", &templateData{
+			FormErrors: formErrors,
+			FormData:   r.PostForm,
+		})
 		return
 	}
 

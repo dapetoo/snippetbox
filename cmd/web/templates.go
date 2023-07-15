@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/dapetoo/snippetbox/pkg/models"
 	"html/template"
+	"net/url"
 	"path/filepath"
 	"time"
 )
@@ -20,6 +21,8 @@ var functions = template.FuncMap{
 // This will hold the structure for any dynamic data that we want to pass to HTML templates
 type templateData struct {
 	CurrentYear int
+	FormData    url.Values
+	FormErrors  map[string]string
 	Snippet     *models.Snippet
 	Snippets    []*models.Snippet
 }
