@@ -49,6 +49,8 @@ func main() {
 	// Initialize a new session manager and configure the session lifetime.
 	session := scs.New()
 	session.Lifetime = 24 * time.Hour
+	session.Cookie.Persist = true
+	session.Cookie.SameSite = http.SameSiteLaxMode
 
 	//Initialize a new instance of application containing the dependencies
 	app := &application{

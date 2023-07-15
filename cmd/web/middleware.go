@@ -32,3 +32,8 @@ func (app *application) recoverPanic(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r)
 	})
 }
+
+// SessionLoad loads and saves session data for current request
+func (app *application) SessionLoad(next http.Handler) http.Handler {
+	return app.session.LoadAndSave(next)
+}

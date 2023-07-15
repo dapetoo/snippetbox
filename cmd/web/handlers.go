@@ -65,7 +65,11 @@ func (app *application) showSnippet2(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	//Retrieve the value of the "flash" key
+	flash := app.session.GetString(r.Context(), "flash")
+
 	app.render(w, r, "show.page.tmpl", &templateData{
+		Flash:   flash,
 		Snippet: s,
 	})
 }
@@ -102,6 +106,9 @@ func (app *application) createSnippet(w http.ResponseWriter, r *http.Request) {
 		app.serverError(w, err)
 		return
 	}
+
+	//Put() to add a string value(Flash message)
+	app.session.Put(r.Context(), "flash", "Snippet successfully created")
 
 	http.Redirect(w, r, fmt.Sprintf("/snippet/%d", id), http.StatusSeeOther)
 }

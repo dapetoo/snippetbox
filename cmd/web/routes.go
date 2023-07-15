@@ -12,6 +12,11 @@ func (app *application) routes() http.Handler {
 
 	//Using Chi as a Router
 	mux := chi.NewRouter()
+
+	//Initialize Middleware
+	mux.Use(app.SessionLoad)
+
+	//Routes
 	mux.Get("/", app.home)
 	mux.Get("/snippet/create", app.createSnippetForm)
 	mux.Get("/snippet/{id}", app.showSnippet2)
