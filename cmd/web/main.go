@@ -48,9 +48,10 @@ func main() {
 
 	// Initialize a new session manager and configure the session lifetime.
 	session := scs.New()
-	session.Lifetime = 24 * time.Hour
+	session.Lifetime = 12 * time.Hour
 	session.Cookie.Persist = true
 	session.Cookie.SameSite = http.SameSiteLaxMode
+	session.Cookie.Secure = true
 
 	//Initialize a new instance of application containing the dependencies
 	app := &application{
@@ -76,7 +77,9 @@ func main() {
 		ErrorLog: errorLog,
 		Handler:  app.routes(),
 	}
-	err = srv.ListenAndServe()
+	//err = srv.ListenAndServe()
+	err = srv.ListenAndServeTLS("./tls/cert.pem", "./tls/key.pem")
+
 	errorLog.Fatal(err)
 }
 
