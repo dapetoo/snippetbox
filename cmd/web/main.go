@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"flag"
+	"github.com/alexedwards/scs/v2"
 	"github.com/dapetoo/snippetbox/pkg/models/mysql"
 	"html/template"
 	"log"
@@ -16,6 +17,7 @@ import (
 type application struct {
 	errorLog      *log.Logger
 	infoLog       *log.Logger
+	session       *scs.SessionManager
 	snippets      *mysql.SnippetModel
 	templateCache map[string]*template.Template
 }
@@ -25,14 +27,8 @@ func main() {
 	addr := flag.String("addr", ":4000", "HTTP network address")
 
 	dsn := flag.String("dsn", "peter:password@/snippetbox?parseTime=true", "MySQL data source name")
+	//secret := flag.String("secret", "", "Secret Key")
 	flag.Parse()
-
-	//Logging to a file
-	//f, err := os.OpenFile("/tmp/info.log", os.O_RDWR|os.O_CREATE, 0666)
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
-	//defer f.Close()
 
 	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
 	errorLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
@@ -50,10 +46,15 @@ func main() {
 		errorLog.Fatal(err)
 	}
 
+	// Initialize a new session manager and configure the session lifetime.
+	session := scs.New()
+	session.Lifetime = 24 * time.Hour
+
 	//Initialize a new instance of application containing the dependencies
 	app := &application{
 		errorLog: errorLog,
 		infoLog:  infoLog,
+		session:  session,
 		snippets: &mysql.SnippetModel{
 			DB: db,
 		},
