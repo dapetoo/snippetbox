@@ -65,11 +65,7 @@ func (app *application) showSnippet2(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//Retrieve the value of the "flash" key
-	flash := app.session.GetString(r.Context(), "flash")
-
 	app.render(w, r, "show.page.tmpl", &templateData{
-		Flash:   flash,
 		Snippet: s,
 	})
 }
