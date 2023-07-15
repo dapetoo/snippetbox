@@ -13,9 +13,9 @@ func (app *application) routes() http.Handler {
 	//Using Chi as a Router
 	mux := chi.NewRouter()
 	mux.Get("/", app.home)
-	mux.Get("/snippet/create", app.createSnippet)
-	mux.Post("/snippet/create", app.createSnippetForm)
+	mux.Get("/snippet/create", app.createSnippetForm)
 	mux.Get("/snippet/{id}", app.showSnippet2)
+	mux.Post("/snippet/create", app.createSnippet)
 
 	//FileServer to serve static files
 	fileServer := http.FileServer(http.Dir("./ui/static/"))

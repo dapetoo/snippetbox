@@ -71,19 +71,25 @@ func (app *application) showSnippet2(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) createSnippetForm(w http.ResponseWriter, r *http.Request) {
-	app.render(w, r, "create.page.tmpl", &templateData{})
+	app.render(w, r, "create.page.tmpl", nil)
 }
 
 func (app *application) createSnippet(w http.ResponseWriter, r *http.Request) {
-	title := "O snail"
-	content := "Any content can goes here.........."
-	expires := "7"
+	//Parsing Form Data
+	err := r.ParseForm()
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+	//Retrieve the relevant data fields from the r.Postform map
+	title := r.PostForm.Get("title")
+	content := r.PostForm.Get("content")
+	expires := r.PostForm.Get("expires")
 
 	//Pass the data to the SnippetModel.Insert() method
 	id, err := app.snippets.Insert(title, content, expires)
 	log.Println(id)
 	if err != nil {
-		log.Println("Error", err)
 		app.serverError(w, err)
 		return
 	}
