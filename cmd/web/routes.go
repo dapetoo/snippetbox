@@ -21,6 +21,11 @@ func (app *application) routes() http.Handler {
 	mux.Get("/snippet/create", app.createSnippetForm)
 	mux.Get("/snippet/{id}", app.showSnippet2)
 	mux.Post("/snippet/create", app.createSnippet)
+	mux.Get("/user/signup", app.signupUserForm)
+	mux.Post("/user/signup", app.signupUser)
+	mux.Get("/user/login", app.loginUserForm)
+	mux.Post("/user/login", app.loginUser)
+	mux.Post("/user/logout", app.logoutUser)
 
 	//FileServer to serve static files
 	fileServer := http.FileServer(http.Dir("./ui/static/"))
