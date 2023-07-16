@@ -32,7 +32,7 @@ func main() {
 	//This will be used when running the app from the command line
 	addr := flag.String("addr", ":4000", "HTTP network address")
 
-	dsn := flag.String("dsn", "peter:password@/snippetbox?parseTime=true", "MySQL data source name")
+	dsn := flag.String("dsn", "peter:password@/snippetbox_development?parseTime=true", "MySQL data source name")
 	//secret := flag.String("secret", "", "Secret Key")
 	flag.Parse()
 
