@@ -54,6 +54,7 @@ func main() {
 	session.Cookie.Persist = true
 	session.Cookie.SameSite = http.SameSiteLaxMode
 	session.Cookie.Secure = true
+	//TODO: Handle Session Token Renewal
 
 	//Initialize a new instance of application containing the dependencies
 	app := &application{
