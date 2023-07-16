@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"github.com/justinas/nosurf"
 	"net/http"
 	"runtime/debug"
 	"time"
@@ -37,6 +38,8 @@ func (app *application) addDefaultData(td *templateData, r *http.Request) *templ
 	td.Flash = app.session.PopString(r.Context(), "flash")
 	//Add the Authentication status to the template data
 	td.IsAuthenticated = app.isAuthenticated(r)
+	//Add CSRFToken to the templateData struct
+	td.CSRFToken = nosurf.Token(r)
 	return td
 }
 

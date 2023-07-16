@@ -23,6 +23,7 @@ type templateData struct {
 	CurrentYear     int
 	Flash           string
 	IsAuthenticated bool
+	CSRFToken       string
 	Form            *forms.Form
 	Snippet         *models.Snippet
 	Snippets        []*models.Snippet

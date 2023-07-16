@@ -15,6 +15,7 @@ func (app *application) routes() http.Handler {
 
 	//Initialize Middleware
 	mux.Use(app.SessionLoad)
+	mux.Use(noSurf)
 
 	//Routes
 	mux.Get("/", app.home)
