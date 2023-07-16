@@ -1,7 +1,10 @@
 package main
 
 import (
+	"context"
+	"errors"
 	"fmt"
+	"github.com/dapetoo/snippetbox/pkg/models"
 	"github.com/justinas/nosurf"
 	"net/http"
 )
@@ -67,4 +70,30 @@ func noSurf(next http.Handler) http.Handler {
 		SameSite: http.SameSiteLaxMode,
 	})
 	return csrfHandler
+}
+
+func (app *application) authenticate(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		//Check if a authenticatedUserID value exists in the session
+		exists := app.session.Exists(r.Context(), "authenticatedUserID")
+		if !exists {
+			next.ServeHTTP(w, r)
+			return
+		}
+
+		//Fetch the details of the current user from the database. If no matching record is found, or the current user account is
+		//deactivated, remove the (invalid) authenticatedUserID value from the session and call the next handler
+		// in the chain as normal
+		user, err := app.users.Get(app.session.GetInt(r.Context(), "authenticatedUserID"))
+		if errors.Is(err, models.ErrNoRecord) || !user.Active {
+			app.session.Remove(r.Context(), "authenticatedUserID")
+			next.ServeHTTP(w, r)
+			return
+		} else if err != nil {
+			app.serverError(w, err)
+			return
+		}
+		ctx := context.WithValue(r.Context(), contextKeyIsAuthenticated, true)
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
 }
