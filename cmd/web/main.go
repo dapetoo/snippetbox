@@ -21,6 +21,7 @@ type application struct {
 	session       *scs.SessionManager
 	snippets      *mysql.SnippetModel
 	templateCache map[string]*template.Template
+	users         *mysql.UserModel
 }
 
 func main() {
@@ -63,6 +64,7 @@ func main() {
 			DB: db,
 		},
 		templateCache: templateCache,
+		users:         &mysql.UserModel{DB: db},
 	}
 
 	infoLog.Println("Database Connected Successfully....")
