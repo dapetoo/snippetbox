@@ -88,8 +88,9 @@ func main() {
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
 	}
-	//err = srv.ListenAndServe()
+
 	infoLog.Printf("Starting the webserver on port %v", *addr)
+	//err = srv.ListenAndServe()
 	err = srv.ListenAndServeTLS("./tls/cert.pem", "./tls/key.pem")
 
 	errorLog.Fatal(err)

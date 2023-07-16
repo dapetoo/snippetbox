@@ -16,7 +16,7 @@ type UserModel struct {
 // Insert to add a new record to the users table
 func (m *UserModel) Insert(name, email, password string) error {
 	//Use Bcrypt to hash the password
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), 24)
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), 12)
 	if err != nil {
 		return err
 	}
