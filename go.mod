@@ -12,3 +12,5 @@ require (
 	github.com/alexedwards/scs/v2 v2.5.1
 	golang.org/x/crypto v0.11.0
 )
+
+require github.com/justinas/nosurf v1.1.1 // indirect
