@@ -18,9 +18,9 @@ func (app *application) routes() http.Handler {
 
 	//Routes
 	mux.Get("/", app.home)
-	mux.Get("/snippet/create", app.createSnippetForm)
-	mux.Get("/snippet/{id}", app.showSnippet2)
-	mux.Post("/snippet/create", app.createSnippet)
+	//mux.Get("/snippet/create", app.createSnippetForm)
+	//mux.Get("/snippet/{id}", app.showSnippet2)
+	//mux.Post("/snippet/create", app.createSnippet)
 	mux.Get("/user/signup", app.signupUserForm)
 	mux.Post("/user/signup", app.signupUser)
 	mux.Get("/user/login", app.loginUserForm)
@@ -32,5 +32,13 @@ func (app *application) routes() http.Handler {
 
 	//Register the File server with mux.Handle
 	mux.Handle("/static/*", http.StripPrefix("/static", fileServer))
+
+	mux.Route("/snippet", func(mux chi.Router) {
+		mux.Use(app.requireAuthentication)
+		mux.Get("/create", app.createSnippetForm)
+		mux.Get("/{id}", app.showSnippet2)
+		mux.Post("/create", app.createSnippet)
+	})
+
 	return standardMiddleware.Then(mux)
 }
