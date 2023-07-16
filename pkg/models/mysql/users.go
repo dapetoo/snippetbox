@@ -2,7 +2,11 @@ package mysql
 
 import (
 	"database/sql"
+	"errors"
 	"github.com/dapetoo/snippetbox/pkg/models"
+	"github.com/go-sql-driver/mysql"
+	"golang.org/x/crypto/bcrypt"
+	"strings"
 )
 
 type UserModel struct {
@@ -11,6 +15,25 @@ type UserModel struct {
 
 // Insert to add a new record to the users table
 func (m *UserModel) Insert(name, email, password string) error {
+	//Use Bcrypt to hash the password
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), 24)
+	if err != nil {
+		return err
+	}
+
+	query := `INSERT INTO users (name, email, hashed_password, created)
+			  VALUES (?,?,?, UTC_TIMESTAMP())`
+
+	_, err = m.DB.Exec(query, name, email, string(hashedPassword))
+	if err != nil {
+		var mySQLError *mysql.MySQLError
+		if errors.As(err, &mySQLError) {
+			if mySQLError.Number == 1062 && strings.Contains(mySQLError.Message, "users_uc_email") {
+				return models.ErrDuplicateEmail
+			}
+		}
+		return err
+	}
 	return nil
 }
 

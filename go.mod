@@ -8,4 +8,7 @@ require (
 	github.com/justinas/alice v1.2.0
 )
 
-require github.com/alexedwards/scs/v2 v2.5.1 // indirect
+require (
+	github.com/alexedwards/scs/v2 v2.5.1
+	golang.org/x/crypto v0.11.0
+)
