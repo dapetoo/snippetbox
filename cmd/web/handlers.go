@@ -10,6 +10,11 @@ import (
 	"strconv"
 )
 
+// Status Checking/Uptime monitoring of the server
+func ping(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("OK"))
+}
+
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
 
 	s, err := app.snippets.Latest()
@@ -20,7 +25,6 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	app.render(w, r, "home.page.tmpl", &templateData{
 		Snippets: s,
 	})
-
 }
 
 func (app *application) showSnippet(w http.ResponseWriter, r *http.Request) {
