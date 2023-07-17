@@ -10,7 +10,12 @@ import (
 
 // HumanDate function to return a nicely formatted string
 func humanDate(t time.Time) string {
-	return t.Format("02 Jan 2006 at 15:04")
+	// Return the empty string if time has the zero value.
+	if t.IsZero() {
+		return ""
+	}
+
+	return t.UTC().Format("02 Jan 2006 at 15:04")
 }
 
 // template.FuncMap object to
@@ -33,7 +38,7 @@ func newTemplateCache(dir string) (map[string]*template.Template, error) {
 	//Initialize a new map to act as the cache
 	cache := map[string]*template.Template{}
 
-	//Filepath.Glob() to get a slice of all filepaths with the extensions "page.tmpl"
+	//Filepath.Glob() to get a slice of all filepath with the extensions "page.tmpl"
 	pages, err := filepath.Glob(filepath.Join(dir, "*.page.tmpl"))
 	if err != nil {
 		return nil, err
