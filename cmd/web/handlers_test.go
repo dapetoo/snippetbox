@@ -2,26 +2,27 @@ package main
 
 import (
 	"io"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 )
 
 func TestPing(t *testing.T) {
-	//Initialize a new httptest.ResponseRecorder
-	rr := httptest.NewRecorder()
 
-	//Initialize a new dummy http.Request
-	r, err := http.NewRequest(http.MethodGet, "/", nil)
+	//Initialize the application struct
+	app := &application{
+		errorLog: log.New(io.Discard, "", 0),
+		infoLog:  log.New(io.Discard, "", 0),
+	}
+
+	ts := httptest.NewTLSServer(app.routes())
+	defer ts.Close()
+
+	rs, err := ts.Client().Get(ts.URL + "/ping")
 	if err != nil {
 		t.Fatal(err)
 	}
-
-	//Call the ping handler function, passing in the ResponseRecorder and the Request
-	ping(rr, r)
-
-	//Call the Result() on the ResponseRecorder to get the http.Response generated
-	rs := rr.Result()
 
 	//Examine the response to check that the status code written by the Ping Handler was 200
 	if rs.StatusCode != http.StatusOK {
