@@ -20,6 +20,7 @@ func (app *application) routes() http.Handler {
 
 	//Routes
 	mux.Get("/", app.home)
+	mux.Get("/ping", http.HandlerFunc(ping))
 	//mux.Get("/snippet/create", app.createSnippetForm)
 	//mux.Get("/snippet/{id}", app.showSnippet2)
 	//mux.Post("/snippet/create", app.createSnippet)
