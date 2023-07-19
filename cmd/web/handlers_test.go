@@ -1,39 +1,21 @@
 package main
 
 import (
-	"io"
-	"log"
 	"net/http"
-	"net/http/httptest"
 	"testing"
 )
 
 func TestPing(t *testing.T) {
 
 	//Initialize the application struct
-	app := &application{
-		errorLog: log.New(io.Discard, "", 0),
-		infoLog:  log.New(io.Discard, "", 0),
-	}
+	app := newTestApplication(t)
 
-	ts := httptest.NewTLSServer(app.routes())
+	ts := newTestServer(t, app.routes())
 	defer ts.Close()
 
-	rs, err := ts.Client().Get(ts.URL + "/ping")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	//Examine the response to check that the status code written by the Ping Handler was 200
-	if rs.StatusCode != http.StatusOK {
-		t.Errorf("want %d; got %d", http.StatusOK, rs.StatusCode)
-	}
-
-	//Check the Response body written by the ping handler equals "OK"
-	defer rs.Body.Close()
-	body, err := io.ReadAll(rs.Body)
-	if err != nil {
-		t.Fatal(err)
+	code, _, body := ts.get(t, "/ping")
+	if code != http.StatusOK {
+		t.Errorf("want %d; got %d", http.StatusOK, code)
 	}
 
 	if string(body) != "OK" {
